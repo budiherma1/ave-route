@@ -2,10 +2,12 @@
 
 - controller should be placed on /app/Controller/
 - middleware should be placed on /app/Middleware/
+- route file is placed at routes/index.js
 
 usage:
+routes/index.js
 ```
-import aveRoute from 'ave-route'
+import aveRoute from '@averoa/ave-route'
 
 // aveRoute
 aveRoute.get('/', 'UserController@getData')
@@ -45,4 +47,18 @@ aveRoute.Router.get('/22', function (req, res) {
 })
 
 export default aveRoute.Router
+```
+
+index.js
+```
+import router from './routes/index.js'
+import express from 'express'
+const app = express()
+const port = 3000
+
+app.use('/', router)
+
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`)
+})
 ```
