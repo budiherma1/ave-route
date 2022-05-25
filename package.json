@@ -1,0 +1,24 @@
+{
+  "name": "@averoa/ave-route",
+  "version": "1.0.0",
+  "description": "route like laravel for express",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/budiherma1/ave-route.git"
+  },
+  "author": "budiherma1",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/budiherma1/ave-route/issues"
+  },
+  "homepage": "https://github.com/budiherma1/ave-route#readme",
+  "keywords": [
+    "route",
+    "laravel",
+    "express"
+  ]
+}
