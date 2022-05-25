@@ -1,4 +1,4 @@
-let express = require('./../express/index.js')
+let express = require('./../../express/index.js')
 const Router = express.Router()
 
 class aveRoute {
@@ -76,14 +76,14 @@ class aveRoute {
 			mid = this.mid;
 		}
 
-		let c = (await import(`./../../app/Controller/${ctm[0]}.js`)).default
+		let c = (await import(`./../../../app/Controller/${ctm[0]}.js`)).default
 		let midd = [];
 		let midn = "";
 		if (mid) {
 			midn = "[";
 			for (let a in mid) {
 				midd.push(
-					(await import(`./../../app/Middleware/${mid[a]}.js`)).default
+					(await import(`./../../../app/Middleware/${mid[a]}.js`)).default
 				)
 				midn += ` midd[${a}].handle,`;
 			}
