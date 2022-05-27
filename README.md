@@ -1,60 +1,68 @@
-# under construction
+# aveRoute
+## Router like laravel for expressjs
 
-- controller should be placed on /app/Controller/
-- middleware should be placed on /app/Middleware/
-- route file is placed at routes/index.js
+Sample usage:
 
-usage:
 routes/index.js
 ```
-import aveRoute from '@averoa/ave-route'
+const averoute = require('@averoa/ave-route');
+const router = averoute.router;
 
-// aveRoute
-aveRoute.get('/', 'UserController@getData')
-aveRoute.post('/middleware', 'UserController@getData', ['AuthMiddleware', 'AuthMiddleware1'])
-aveRoute.put('/about', 'AboutController@getData')
-aveRoute.delete('/ab*cd', 'AboutController@getData')
-aveRoute.get('/user/:address/:user_id', 'AboutController@getDataParams')
-aveRoute.get('/user', 'AboutController@getDataQuery')
-aveRoute.any('/anymenthod', 'AboutController@getDataQuery')
-aveRoute.match(['get', 'post'], '/multimethod', 'AboutController@getDataQuery')
+// default directories for controller and middleware are 'app/Controller/' and 'app/Middleware/'
+// you can set to another directories using method below
+averoute.setDir({
+	controller: 'sample_dir/another_dir/Controller/',
+	middleware: 'sample_dir/Middleware/'
+});
 
-aveRoute.middleware(['AuthMiddleware2', 'AuthMiddleware1', 'AuthMiddleware1'], () => {
-	aveRoute.prefix('middleware-prefix', () => {
-		aveRoute.get('sample-route', 'UserController@getData')
-	})
-	aveRoute.get('/aboutmid', 'AboutController@getData')
-})
-aveRoute.group({ middleware: ['AuthMiddleware', 'AuthMiddleware1'], prefix: 'group-middleware-prefix' }, () => {
-	aveRoute.get('/route', 'AboutController@getData')
-})
+// averoute
+averoute.get('/', 'UserController@getData');
+averoute.get('/aa/', 'UserController@aa');
+averoute.post('/middleware', 'UserController@getData', ['AuthMiddleware', 'AuthMiddleware1']);
+averoute.put('/about', 'AboutController@getData');
+averoute.delete('/ab*cd', 'AboutController@getData');
+averoute.get('/user/:address/:user_id', 'AboutController@getDataParams');
+averoute.get('/user', 'AboutController@getDataQuery');
+averoute.any('/anymenthod', 'AboutController@getDataQuery');
+averoute.match(['get', 'post'], '/multimethod', 'AboutController@getDataQuery');
 
-aveRoute.prefix('prefix', function () {
-	aveRoute.middleware(['AuthMiddleware2', 'AuthMiddleware1', 'AuthMiddleware1'], function () {
-		aveRoute.get('middleware-route', 'UserController@getData')
-	})
-})
+averoute.middleware(['AuthMiddleware2', 'AuthMiddleware1', 'AuthMiddleware1'], () => {
+	averoute.prefix('middleware-prefix', () => {
+		averoute.get('sample-route', 'UserController@getData')
+	});
+	averoute.get('/aboutmid', 'AboutController@getData');
+});
 
-aveRoute.get('1', 'UserController@getData')
+averoute.group({ middleware: ['AuthMiddleware', 'AuthMiddleware1'], prefix: 'group-middleware-prefix' }, () => {
+	averoute.get('/route', 'AboutController@getData');
+});
+
+averoute.prefix('prefix', function () {
+	averoute.middleware(['AuthMiddleware2', 'AuthMiddleware1', 'AuthMiddleware1'], function () {
+		averoute.get('middleware-route', 'UserController@getData');
+	});
+});
+
+averoute.get('1', 'UserController@getData');
 
 // Original express route
-aveRoute.Router.get('/11', function (req, res) {
-    res.send('Birds home page')
+router.get('/11', function (req, res) {
+    res.send('Birds home page');
 })
 
-aveRoute.Router.get('/22', function (req, res) {
-    res.send('About birds')
+router.get('/22', function (req, res) {
+    res.send('About birds');
 })
 
-export default aveRoute.Router
+module.exports = router
 ```
 
 index.js
 ```
-import router from './routes/index.js'
-import express from 'express'
+const express = require('express');
 const app = express()
 const port = 3000
+const router = require('./routes/index.js');
 
 app.use('/', router)
 

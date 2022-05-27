@@ -1,40 +1,51 @@
-let express = require('./../../express/index.js')
-const Router = express.Router()
+const express = require('express')
+const router = express.Router()
 
 class aveRoute {
 
-	constructor(){
-		this.Router = Router;
-	}
-	async get(path, ct, mid) {
-		return this.proceed('get', path, ct, mid);
-	}
-
-	async post(path, ct, mid) {
-		return this.proceed('post', path, ct, mid);
+	constructor() {
+		this.router = router;
+		this.c_path = "/app/Controller/";
+		this.m_path = "/app/Middleware/";
 	}
 
-	async put(path, ct, mid) {
-		return this.proceed('put', path, ct, mid);
+	async setDir({controller, middleware}) {
+		this.c_path = ('/' + controller + '/').replace('//', '/');
+		this.m_path = ('/' + middleware + '/').replace('//', '/');
+	}
+	
+	async get(pt, ct, mid) {
+		return this.proceed('get', pt, ct, mid);
 	}
 
-	async delete(path, ct, mid) {
-		return this.proceed('delete', path, ct, mid);
+	async post(pt, ct, mid) {
+		return this.proceed('post', pt, ct, mid);
 	}
-	async patch(path, ct, mid) {
-		return this.proceed('patch', path, ct, mid);
+
+	async put(pt, ct, mid) {
+		return this.proceed('put', pt, ct, mid);
 	}
-	async match(route, path, ct, mid) {
-		for (let i of route) {
-			this.proceed(i, path, ct, mid);
+
+	async delete(pt, ct, mid) {
+		return this.proceed('delete', pt, ct, mid);
+	}
+
+	async patch(pt, ct, mid) {
+		return this.proceed('patch', pt, ct, mid);
+	}
+
+	async match(rt, pt, ct, mid) {
+		for (let i of rt) {
+			this.proceed(i, pt, ct, mid);
 		}
 	}
-	async any(path, ct, mid) {
-		this.proceed('get', path, ct, mid);
-		this.proceed('post', path, ct, mid);
-		this.proceed('put', path, ct, mid);
-		this.proceed('delete', path, ct, mid);
-		this.proceed('patch', path, ct, mid);
+
+	async any(pt, ct, mid) {
+		this.proceed('get', pt, ct, mid);
+		this.proceed('post', pt, ct, mid);
+		this.proceed('put', pt, ct, mid);
+		this.proceed('delete', pt, ct, mid);
+		this.proceed('patch', pt, ct, mid);
 	}
 
 	async middleware(mid = [], cb) {
@@ -49,7 +60,7 @@ class aveRoute {
 		this.pref = '';
 	}
 
-	async group({middleware, prefix}, cb) {
+	async group({ middleware, prefix }, cb) {
 		if (middleware) {
 			this.mid = middleware;
 		}
@@ -67,8 +78,8 @@ class aveRoute {
 		}
 	}
 
-	async proceed(type, path, ct, mid) {
-		let p = ('/' + path).replace('//', '/');
+	async proceed(ty, pt, ct, mid) {
+		let p = ('/' + pt).replace('//', '/');
 		let ctm = ct.split('@');
 		let pref = this.pref ?? '';
 
@@ -76,28 +87,23 @@ class aveRoute {
 			mid = this.mid;
 		}
 
-		let c = (await import(`./../../../app/Controller/${ctm[0]}.js`)).default
+		let c = (await import(`./../../..${this.c_path}${ctm[0]}.js`)).default
 		let midd = [];
 		let midn = "";
 		if (mid) {
 			midn = "[";
 			for (let a in mid) {
 				midd.push(
-					(await import(`./../../../app/Middleware/${mid[a]}.js`)).default
+					(await import(`./../../..${this.m_path}${mid[a]}.js`)).default
 				)
 				midn += ` midd[${a}].handle,`;
 			}
 			midn += "], ";
 		}
 
-		let route = `Router.${type}('${pref}${p}',${mid ? midn : ''}c.${ctm[1]})`;
-
-		// console.log(route)
-		return eval(route)
+		let route = `this.router.${ty}('${pref}${p}',${mid ? midn : ''}c.${ctm[1]})`;
+		return eval(route);
 	}
 }
-
-// export let Router = Route;
-// export default new aveRoute;
 
 module.exports = new aveRoute;
