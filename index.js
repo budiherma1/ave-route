@@ -7,11 +7,13 @@ class aveRoute {
 		this.router = router;
 		this.c_path = "/app/Controller/";
 		this.m_path = "/app/Middleware/";
+		this.m_met = "handle";
 	}
 
-	async setDir({controller, middleware}) {
-		this.c_path = ('/' + controller + '/').replace('//', '/');
-		this.m_path = ('/' + middleware + '/').replace('//', '/');
+	async config({controller, middleware}) {
+		this.c_path = ('/' + controller.path + '/').replace('//', '/');
+		this.m_path = ('/' + middleware.path + '/').replace('//', '/');
+		this.m_met = middleware.method;
 	}
 	
 	async get(pt, ct, mid) {
@@ -96,12 +98,12 @@ class aveRoute {
 				midd.push(
 					(await import(`./../../..${this.m_path}${mid[a]}.js`)).default
 				)
-				midn += ` midd[${a}].handle,`;
+				midn += ` midd[${a}].${this.m_met},`;
 			}
 			midn += "], ";
 		}
-
-		let route = `this.router.${ty}('${pref}${p}',${mid ? midn : ''}c.${ctm[1]})`;
+		
+		let route = `this.router.${ty}('${pref}${p}',${mid ? midn : ''} (req, res) => c.${ctm[1]}(req, res))`;
 		return eval(route);
 	}
 }

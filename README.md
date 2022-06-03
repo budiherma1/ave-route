@@ -9,10 +9,11 @@ const averoute = require('@averoa/ave-route');
 const router = averoute.router;
 
 // default directories for controller and middleware are 'app/Controller/' and 'app/Middleware/'
-// you can set to another directories using method below
-averoute.setDir({
-	controller: 'sample_dir/another_dir/Controller/',
-	middleware: 'sample_dir/Middleware/'
+// default method for middleware is 'handle'
+// you can set to another directories and the method using method below
+averoute.config({
+	controller: {path: 'sample_dir/Controller/'},
+	middleware: {path: 'sample_dir/sample_dir/Middleware/', method: 'handle'}
 });
 
 // averoute
@@ -69,4 +70,39 @@ app.use('/', router)
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
+```
+
+sample Controller
+
+```
+class HomeController {
+
+	async getDataTest(req, res) {
+		res.send('hello world')
+	}
+	
+	async getData(req, res) {
+		res.send('hello world')
+	}
+
+	async real(req, res) {
+		res.send('hello world')
+	}
+
+}
+
+module.exports = new HomeController;
+```
+
+sample Middleware
+
+```
+class AuthMiddleware {
+	handle (req, res, next) {
+		console.log('middleware')
+		next()
+	}
+}
+
+module.exports = new AuthMiddleware
 ```
