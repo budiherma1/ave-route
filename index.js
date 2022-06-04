@@ -11,9 +11,9 @@ class aveRoute {
 	}
 
 	async config({controller, middleware}) {
-		this.c_path = ('/' + controller.path + '/').replace('//', '/');
-		this.m_path = ('/' + middleware.path + '/').replace('//', '/');
-		this.m_met = middleware.method;
+		this.c_path = controller.path ? ('/' + controller.path + '/').replace('//', '/') : this.c_path;
+		this.m_path = middleware.path ? ('/' + middleware.path + '/').replace('//', '/') : this.m_path;
+		this.m_met = middleware.method ? middleware.method : this.m_met;
 	}
 	
 	async get(pt, ct, mid) {
