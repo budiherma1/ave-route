@@ -10,7 +10,7 @@ const router = averoute.router;
 
 // default directories for controller and middleware are 'app/Controller/' and 'app/Middleware/'
 // default method for middleware is 'handle'
-// you can set to another directories and the method using method below
+// you can set to another directories and method using function below
 averoute.config({
 	controller: {path: 'sample_dir/Controller/'},
 	middleware: {path: 'sample_dir/sample_dir/Middleware/', method: 'handle'}
@@ -21,8 +21,11 @@ averoute.get('/', 'UserController@getData');
 averoute.get('/aa/', 'UserController@aa');
 averoute.post('/middleware', 'UserController@getData', ['AuthMiddleware', 'AuthMiddleware1']);
 averoute.put('/about', 'AboutController@getData');
+
 averoute.delete('/ab*cd', 'AboutController@getData');
 averoute.get('/user/:address/:user_id', 'AboutController@getDataParams');
+// see on https://expressjs.com/en/guide/routing.html for another variation
+
 averoute.get('/user', 'AboutController@getDataQuery');
 averoute.any('/anymenthod', 'AboutController@getDataQuery');
 averoute.match(['get', 'post'], '/multimethod', 'AboutController@getDataQuery');
