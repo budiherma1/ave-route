@@ -6,9 +6,9 @@ class aveRoute {
 	constructor() {
 		this.c_path = "/app/Controllers/";
 		this.m_path = "/app/Middleware/";
-		this.mod_path = "/app/Models/";
 		this.m_met = "handle";
 		this.router = express.Router();
+		this.express = this.router;
 		this.mid = [];
 		this.importControllers = {};
 		this.importMiddlewares = {};
@@ -25,9 +25,6 @@ class aveRoute {
 		this.m_met = middleware.method ? middleware.method : this.m_met;
 	}
 
-	async express() {
-		return this.router;
-	}
 	get(pt, ct, mid) {
 		return this.proceed('get', pt, ct, mid);
 	}

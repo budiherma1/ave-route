@@ -7,7 +7,6 @@ Sample usage:
 routes/index.js
 ```
 const Router = require('@averoa/ave-route');
-
 const router = Router();
 
 // default directories for controller and middleware are 'app/Controller/' and 'app/Middleware/'
@@ -19,38 +18,38 @@ router.config({
 });
 
 // router
-router.get('/', 'UserController@getData');
-router.get('/aa/', 'UserController@aa');
-router.post('/middleware', 'UserController@getData', ['AuthMiddleware', 'AuthMiddleware1']);
-router.put('/about', 'AboutController@getData');
+router.get('/', 'HomeController@getData');
+router.get('/aa/', 'HomeController@getData');
+router.post('/middleware', 'HomeController@getData', ['AuthMiddleware', 'AuthMiddleware1']);
+router.put('/about', 'HomeController@getData');
 
-router.delete('/ab*cd', 'AboutController@getData');
-router.get('/user/:address/:user_id', 'AboutController@getDataParams');
+router.delete('/ab*cd', 'HomeController@getData');
+router.get('/user/:address/:user_id', 'HomeController@getDataTest');
 // see on https://expressjs.com/en/guide/routing.html for another variation
 
-router.get('/user', 'AboutController@getDataQuery');
-router.any('/anymenthod', 'AboutController@getDataQuery');
-router.all('/anymenthod', 'AboutController@getDataQuery');
-router.match(['get', 'post'], '/multimethod', 'AboutController@getDataQuery');
+router.get('/user', 'HomeController@getDataTest');
+router.any('/anymenthod', 'HomeController@getDataTest');
+router.all('/anymenthod', 'HomeController@getDataTest');
+router.match(['get', 'post'], '/multimethod', 'HomeController@getDataTest');
 
-router.middleware(['AuthMiddleware2', 'AuthMiddleware1', 'AuthMiddleware1'], () => {
+router.middleware(['AuthMiddleware2', 'AuthMiddleware1'], () => {
 	router.prefix('middleware-prefix', () => {
-		router.get('sample-route', 'UserController@getData')
+		router.get('sample-route', 'HomeController@getDataTest')
 	});
-	router.get('/aboutmid', 'AboutController@getData');
+	router.get('/aboutmid', 'HomeController@getData');
 });
 
 router.group({ middleware: ['AuthMiddleware', 'AuthMiddleware1'], prefix: 'group-middleware-prefix' }, () => {
-	router.get('/route', 'AboutController@getData');
+	router.get('/route', 'HomeController@getData');
 });
 
 router.prefix('prefix', function () {
-	router.middleware(['AuthMiddleware2', 'AuthMiddleware1', 'AuthMiddleware1'], function () {
-		router.get('middleware-route', 'UserController@getData');
+	router.middleware(['AuthMiddleware', 'AuthMiddleware1', 'AuthMiddleware2'], function () {
+		router.get('middleware-route', 'HomeController@getDataTest');
 	});
 });
 
-router.get('1', 'UserController@getData');
+router.get('1', 'HomeController@getDataTest');
 
 // Original express route
 router.express.get('/11', function (req, res) {
@@ -71,11 +70,17 @@ const app = express()
 const port = 3000
 const router = require('./routes/index.js');
 
-app.use('/', router.init())
+// should be wrapped by async function
+const init = async () => {
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
-})
+	app.use('/', await router.init())
+	
+	app.listen(port, () => {
+	  console.log(`Example app listening at http://localhost:${port}`)
+	})
+}
+
+init();
 ```
 
 sample Controller
