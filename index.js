@@ -1,48 +1,60 @@
+
 const express = require('express')
-const router = express.Router()
 
 class aveRoute {
 
 	constructor() {
-		this.router = router;
-		this.c_path = "/app/Controller/";
+		this.c_path = "/app/Controllers/";
 		this.m_path = "/app/Middleware/";
+		this.mod_path = "/app/Models/";
 		this.m_met = "handle";
+		this.router = express.Router();
+		this.mid = [];
+		this.importControllers = {};
+		this.importMiddlewares = {};
+		this.allRoutes = [];
 	}
 
-	async config({controller, middleware}) {
+	static Router() {
+		return new this;
+	}
+
+	config({ controller, middleware }) {
 		this.c_path = controller.path ? ('/' + controller.path + '/').replace('//', '/') : this.c_path;
 		this.m_path = middleware.path ? ('/' + middleware.path + '/').replace('//', '/') : this.m_path;
 		this.m_met = middleware.method ? middleware.method : this.m_met;
 	}
-	
-	async get(pt, ct, mid) {
+
+	async express() {
+		return this.router;
+	}
+	get(pt, ct, mid) {
 		return this.proceed('get', pt, ct, mid);
 	}
 
-	async post(pt, ct, mid) {
+	post(pt, ct, mid) {
 		return this.proceed('post', pt, ct, mid);
 	}
 
-	async put(pt, ct, mid) {
+	put(pt, ct, mid) {
 		return this.proceed('put', pt, ct, mid);
 	}
 
-	async delete(pt, ct, mid) {
+	delete(pt, ct, mid) {
 		return this.proceed('delete', pt, ct, mid);
 	}
 
-	async patch(pt, ct, mid) {
+	patch(pt, ct, mid) {
 		return this.proceed('patch', pt, ct, mid);
 	}
 
-	async match(rt, pt, ct, mid) {
+	match(rt, pt, ct, mid) {
 		for (let i of rt) {
 			this.proceed(i, pt, ct, mid);
 		}
 	}
 
-	async any(pt, ct, mid) {
+	any(pt, ct, mid) {
 		this.proceed('get', pt, ct, mid);
 		this.proceed('post', pt, ct, mid);
 		this.proceed('put', pt, ct, mid);
@@ -50,62 +62,90 @@ class aveRoute {
 		this.proceed('patch', pt, ct, mid);
 	}
 
-	async middleware(mid = [], cb) {
-		this.mid = mid;
-		cb();
-		this.mid = '';
+	all(pt, ct, mid) {
+		this.proceed('all', pt, ct, mid);
 	}
 
-	async prefix(pref, cb) {
-		this.pref = ('/' + pref).replace('//', '/');
+	middleware(mid = [], cb) {
+		this.mid = [...this.mid, ...mid];
 		cb();
-		this.pref = '';
+		this.mid = this.mid.filter(function (item) {
+			return !(mid.includes(item))
+		});
 	}
 
-	async group({ middleware, prefix }, cb) {
+	prefix(pref, cb) {
+		let filteredPref = ('/' + pref).replace('//', '/');
+		this.pref = (this.pref ?? '') + filteredPref;
+		cb();
+		this.pref = this.pref.replace(filteredPref, '');
+	}
+
+	group({ middleware, prefix }, cb) {
+		let filteredPref = '';
 		if (middleware) {
-			this.mid = middleware;
+			this.mid = [...this.mid, ...middleware];
 		}
 		if (prefix) {
-			this.pref = ('/' + prefix).replace('//', '/');
+			filteredPref = ('/' + prefix).replace('//', '/');
+			this.pref = (this.pref ?? '') + filteredPref;
 		}
 
 		cb();
 
 		if (middleware) {
-			this.mid = '';
+			this.mid = this.mid.filter(function (item) {
+				return !(middleware.includes(item))
+			});
 		}
 		if (prefix) {
-			this.pref = '';
+			this.pref = this.pref.replace(filteredPref, '');
 		}
 	}
 
-	async proceed(ty, pt, ct, mid) {
+	proceed(ty, pt, ct, mid) {
 		let p = ('/' + pt).replace('//', '/');
 		let ctm = ct.split('@');
 		let pref = this.pref ?? '';
 
-		if (this.mid) {
+		if (this.mid.length) {
 			mid = this.mid;
 		}
 
-		let c = (await import(`./../../..${this.c_path}${ctm[0]}.js`)).default
-		let midd = [];
+		this.importControllers[ctm[0]] = `./../../..${this.c_path}${ctm[0]}.js`;
+
 		let midn = "";
+
 		if (mid) {
-			midn = "[";
+			midn = `[`;
+
 			for (let a in mid) {
-				midd.push(
-					(await import(`./../../..${this.m_path}${mid[a]}.js`)).default
-				)
-				midn += ` midd[${a}].${this.m_met},`;
+				this.importMiddlewares[mid[a]] = `./../../..${this.m_path}${mid[a]}.js`;
+				midn += ` (req, res, next) => middleware.${mid[a]}.${this.m_met}(req, res, next),`;
 			}
 			midn += "], ";
 		}
-		
-		let route = `this.router.${ty}('${pref}${p}',${mid ? midn : ''} (req, res) => c.${ctm[1]}(req, res))`;
-		return eval(route);
+
+		let route = `this.router.${ty}('${pref}${p}',${mid ? midn : ''} controller.${ctm[0]}.${ctm[1]})`;
+		this.allRoutes.push(route);
+	}
+
+	async init() {
+		let controller = {}
+		let middleware = {}
+		for (let key in this.importControllers) {
+			controller[key] = (await import(this.importControllers[key])).default
+		}
+		for (let key1 in this.importMiddlewares) {
+			middleware[key1] = (await import(this.importMiddlewares[key1])).default
+		}
+
+		Promise.all(this.allRoutes.map((v, i) => {
+			return eval(v);
+		}))
+
+		return this.router;
 	}
 }
 
-module.exports = new aveRoute;
+module.exports = aveRoute.Router.bind(aveRoute);
