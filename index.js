@@ -73,7 +73,7 @@ class aveRoute {
 
 	prefix(pref, cb) {
 		let filteredPref = ('/' + pref).replace('//', '/');
-		this.pref = (this.pref ?? '') + filteredPref;
+		this.pref = (this.pref ? this.pref : '') + filteredPref;
 		cb();
 		this.pref = this.pref.replace(filteredPref, '');
 	}
@@ -85,7 +85,7 @@ class aveRoute {
 		}
 		if (prefix) {
 			filteredPref = ('/' + prefix).replace('//', '/');
-			this.pref = (this.pref ?? '') + filteredPref;
+			this.pref = (this.pref ? this.pref : '') + filteredPref;
 		}
 
 		cb();
@@ -103,7 +103,7 @@ class aveRoute {
 	proceed(ty, pt, ct, mid) {
 		let p = ('/' + pt).replace('//', '/');
 		let ctm = ct.split('@');
-		let pref = this.pref ?? '';
+		let pref = this.pref ? this.pref : '';
 
 		if (this.mid.length) {
 			mid = this.mid;
